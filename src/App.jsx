@@ -5,7 +5,7 @@ import NavBar from "./components/NavBar";
 import CssBaseline from "@mui/material/CssBaseline";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
-import Login from "./pages/Login";
+import Footer from "./components/Footer";
 
 function App() {
   const [mode, setMode] = React.useState(
@@ -15,16 +15,24 @@ function App() {
   );
   const theme = React.useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
   return (
-    <div>
-      <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <div
+        style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         <NavBar setMode={setMode} />
         <CssBaseline />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-        </Routes>
-      </ThemeProvider>
-    </div>
+        <main style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </ThemeProvider>
   );
 }
 

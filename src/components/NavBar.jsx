@@ -6,11 +6,14 @@ import Avatar from "@mui/material/Avatar";
 import logoImage from "@/assets/images/tale-logo.jpg";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import { useTheme, Box, Stack, IconButton, Button } from "@mui/material";
+import { useTheme, Box, Stack, IconButton } from "@mui/material";
 import { Link } from "react-router";
+import LoginPopover from "./LoginPopover";
+import SignupDialog from "./SignupDialog";
 
 function NavBar({ setMode }) {
   const theme = useTheme();
+
   return (
     <AppBar
       elevation={0}
@@ -41,7 +44,6 @@ function NavBar({ setMode }) {
           >
             Tale
           </Typography>
-          <Link to="/">Home</Link>
           <Box flexGrow={1} />
           <Stack direction={"row"}>
             {theme.palette.mode === "light" ? (
@@ -75,12 +77,8 @@ function NavBar({ setMode }) {
                 <DarkModeOutlinedIcon />
               </IconButton>
             )}
-            <Button color="primary" sx={{ mx: 1 }}>
-              Login
-            </Button>
-            <Button variant="contained" color="primary">
-              Sign up
-            </Button>
+            <LoginPopover />
+            <SignupDialog />
           </Stack>
         </Toolbar>
       </Container>

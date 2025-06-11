@@ -1,3 +1,5 @@
+import { ColorLensRounded } from "@mui/icons-material";
+
 export const getDesignTokens = (mode) => ({
   palette: {
     mode,
@@ -10,6 +12,9 @@ export const getDesignTokens = (mode) => ({
       main: "#e0e0e0",
       light: "#ffffff",
       dark: "#aeaeae",
+    },
+    footer: {
+      background: mode === "light" ? "#000" : "",
     },
     text: {
       primary: mode === "light" ? "#333333" : "#ffffff",
@@ -61,7 +66,7 @@ export const getDesignTokens = (mode) => ({
           },
         },
         contained: {
-          backgroundColor: mode === "light" ? "#333333" : "#f3f3f3",
+          backgroundColor: mode === "light" ? "#15171a" : "#f3f3f3",
           color: mode === "light" ? "#ffffff" : "#333333",
           "&:hover": {
             backgroundColor: mode === "light" ? "#666666" : "#ffffff",
@@ -152,7 +157,7 @@ export const getDesignTokens = (mode) => ({
     MuiDialog: {
       styleOverrides: {
         paper: {
-          backgroundColor: mode === "light" ? "#ffffff" : "#1e1e1e",
+          backgroundColor: mode === "light" ? "#ffffff" : "#080414",
         },
       },
     },
@@ -160,6 +165,18 @@ export const getDesignTokens = (mode) => ({
       styleOverrides: {
         root: {
           borderColor: mode === "light" ? "#f3f3f3" : "#333333",
+        },
+      },
+    },
+    MuiFab: {
+      styleOverrides: {
+        root: {
+          backgroundColor: mode === "light" ? "#15171a" : "#f3f3f3",
+          color: mode === "light" ? "#ffffff" : "#333333",
+          "&:hover": {
+            backgroundColor: mode === "light" ? "#666666" : "#ffffff",
+            color: mode === "light" ? "#ffffff" : "#333333",
+          },
         },
       },
     },
