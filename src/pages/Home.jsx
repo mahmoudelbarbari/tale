@@ -60,7 +60,7 @@ function Home() {
             <Grid item key={idx}>
               <Box
                 sx={{
-                  position: "relative", // for absolute positioning of icons
+                  position: "relative",
                   display: "flex",
                   flexDirection: { xs: "column", sm: "row" },
                   alignItems: { xs: "flex-start", sm: "center" },
