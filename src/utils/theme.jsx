@@ -123,7 +123,6 @@ export const getDesignTokens = (mode) => ({
         paper: {
           backgroundColor: mode === "light" ? "#ffffff" : "#080414",
           m: { xs: 2, sm: 0 },
-          // width: { xs: "90%", sm: "100%" },
           borderRadius: { xs: 2, sm: 0 },
         },
       },

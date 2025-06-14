@@ -138,7 +138,6 @@ function Home() {
     }
   };
 
-  // Update the edit button click handler
   const handleEditClick = (blog) => {
     setEditBlog(blog);
   };

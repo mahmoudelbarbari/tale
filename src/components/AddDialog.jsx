@@ -31,9 +31,8 @@ function AddDialog({ isEdit, blogToEdit, onEdit }) {
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
-    // Clear form data when closing
+
     if (isEdit) {
-      // If in edit mode, reset the blog to edit
       onEdit(null, null);
     }
   };
