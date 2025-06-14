@@ -5,20 +5,16 @@ import {
   Box,
   TextField,
   Typography,
-  useMediaQuery,
   Stack,
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
 import heroImg from "@/assets/images/hero.png";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app } from "../config/firebase"; // Adjust this import to your Firebase config file
+import { app } from "../config/firebase";
 
-export default function LoginPopover({ children, onLogin }) {
+export default function LoginPopover({ onLogin }) {
   const [open, setOpen] = useState(false);
-  const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -84,15 +80,9 @@ export default function LoginPopover({ children, onLogin }) {
   return (
     <>
       <Button sx={{ mx: 1 }} onClick={handleOpen}>
-        {children || "Login"}
+        {"Login"}
       </Button>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        fullScreen={fullScreen}
-        maxWidth="lg"
-        fullWidth
-      >
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="lg">
         <Box sx={{ p: { xs: 1, sm: 4 } }}>
           <Typography variant="h4" align="center" gutterBottom>
             Login
@@ -121,7 +111,7 @@ export default function LoginPopover({ children, onLogin }) {
                 width: { xs: "100%", sm: "50%" },
                 height: { xs: 200, sm: 400 },
                 objectFit: "cover",
-                borderRadius: { xs: 2, sm: "16px 0 0 16px" },
+                borderRadius: 2,
                 display: "block",
               }}
             />
@@ -162,7 +152,7 @@ export default function LoginPopover({ children, onLogin }) {
                 variant="contained"
                 color="primary"
                 fullWidth
-                sx={{ mt: 2 }}
+                sx={{ mt: 5, p: 1.2 }}
                 disabled={loading}
               >
                 {loading ? <CircularProgress size={24} /> : "Login"}

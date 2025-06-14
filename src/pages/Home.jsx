@@ -1,40 +1,147 @@
-import { Box, Button, Grid, Stack, Typography, useTheme } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Grid,
+  Snackbar,
+  Stack,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import heroSectionImgLight from "@/assets/images/tale-hero.png";
 import heroSectionImgDark from "@/assets/images/tale-hero-dark.png";
 import AddDialog from "../components/AddDialog";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
-// Example data
-const items = [
-  {
-    img: heroSectionImgLight,
-    title: "Hope dies last",
-    sub: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.",
-    editIcon: <ModeEditIcon />,
-    deleteIcon: <DeleteOutlineIcon />,
-  },
-  {
-    img: heroSectionImgLight,
-    title: "Hope dies last",
-    sub: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.",
-    editIcon: <ModeEditIcon />,
-    deleteIcon: <DeleteOutlineIcon />,
-  },
-  {
-    img: heroSectionImgLight,
-    title: "Hope dies last",
-    sub: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Egestas dui id ornare arcu odio ut sem. Cras ornare arcu dui vivamus arcu felis bibendum ut. Porttitor leo a diam.",
-    editIcon: <ModeEditIcon />,
-    deleteIcon: <DeleteOutlineIcon />,
-  },
-  // Add more items as needed
-];
+import { useEffect, useState } from "react";
+import { collection, onSnapshot, doc, getDoc } from "firebase/firestore";
+import { firestoreDb } from "../config/firebase";
+import { deleteBlog } from "../config/firestore";
+import { auth } from "../config/firebase";
 
 function Home() {
   const theme = useTheme();
   const heroImg =
     theme.palette.mode === "dark" ? heroSectionImgDark : heroSectionImgLight;
+
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [authors, setAuthors] = useState({});
+  const [open, setOpen] = useState(false);
+  const [snackBarMessage, setSnackbarMessage] = useState("");
+  const handleClose = () => setOpen(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [editBlog, setEditBlog] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const fetchAuthorName = async (userId) => {
+    try {
+      const userDoc = doc(firestoreDb, "users", userId);
+      const userSnapshot = await getDoc(userDoc);
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        setAuthors((prev) => ({
+          ...prev,
+          [userId]: userData.name || userData.displayName || "Unknown Author",
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching author:", error);
+    }
+  };
+
+  useEffect(() => {
+    const blogCollection = collection(firestoreDb, "blog");
+
+    const querySnapShot = onSnapshot(
+      blogCollection,
+      (snapshot) => {
+        const blogList = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          if (data.userId) {
+            fetchAuthorName(data.userId);
+          }
+          return {
+            id: doc.id,
+            img: data.image,
+            title: data.title,
+            sub: data.description,
+            userId: data.userId,
+            editIcon: <ModeEditIcon />,
+            deleteIcon: <DeleteOutlineIcon />,
+            date: new Date(data.createdAt).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            }),
+          };
+        });
+        setItems(blogList);
+        setLoading(false);
+      },
+      (error) => {
+        console.log("Error fetching blogs: ", error);
+        setLoading(false);
+      }
+    );
+    return () => querySnapShot();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="200px"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  const handleDeleteBlog = async (blogId) => {
+    try {
+      await deleteBlog(blogId);
+      setSnackbarMessage("Blog deleted successfuly");
+      setOpen(true);
+    } catch (e) {
+      console.log("Error deleting blog !", e);
+      setSnackbarMessage("Error deleting blog at this moment !", e.message);
+      setOpen(true);
+    }
+  };
+
+  const handleEdit = async (blogId, updatedData) => {
+    try {
+      if (!blogId || !updatedData) {
+        setEditBlog(null);
+        return;
+      }
+
+      await updateBlog(blogId, updatedData);
+      setSnackbarMessage("Blog updated successfully");
+      setOpen(true);
+      setEditBlog(null);
+    } catch (error) {
+      console.error("Error updating blog:", error);
+      setSnackbarMessage("Error updating blog");
+      setOpen(true);
+    }
+  };
+
+  // Update the edit button click handler
+  const handleEditClick = (blog) => {
+    setEditBlog(blog);
+  };
 
   return (
     <>
@@ -65,14 +172,18 @@ function Home() {
                   flexDirection: { xs: "column", sm: "row" },
                   alignItems: { xs: "flex-start", sm: "center" },
                   borderBottom: `2px solid ${theme.palette.border.bottom}`,
-                  p: 2,
-                  gap: 3,
-                  minHeight: 150,
+                  p: { xs: 2, sm: 3 },
+                  m: 2,
+                  gap: { xs: 2, sm: 3 },
                   width: "100%",
                   maxWidth: 1800,
                   mx: "auto",
                   bgcolor: "background.paper",
-                  borderRadius: 2,
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                    boxShadow: 2,
+                  },
                 }}
               >
                 <Box
@@ -80,14 +191,21 @@ function Home() {
                   src={item.img}
                   alt={item.title}
                   sx={{
-                    width: 240,
-                    height: 240,
+                    width: { xs: "100%", sm: 300, md: 200 },
+                    height: { xs: 200, sm: 200, md: 150 },
                     objectFit: "cover",
-                    borderRadius: 1,
+                    border: `2px solid ${theme.palette.border.main}`,
+                    borderRadius: 3,
                     flexShrink: 0,
                   }}
                 />
-                <Box sx={{ flex: 1 }}>
+                <Box
+                  sx={{
+                    flex: 1,
+                    width: { xs: "100%", md: "auto" },
+                    textAlign: { xs: "center", md: "left" },
+                  }}
+                >
                   <Typography variant="h5" fontWeight={700} gutterBottom>
                     {item.title}
                   </Typography>
@@ -97,27 +215,66 @@ function Home() {
                 </Box>
                 <Box
                   sx={{
-                    position: "absolute",
-                    right: 16,
-                    bottom: 16,
+                    position: { xs: "relative", md: "absolute" },
+                    right: { md: 16 },
+                    bottom: { md: 16 },
                     display: "flex",
-                    gap: 1,
+                    justifyContent: "space-between",
+                    mt: { xs: 2, md: 0 },
+                    alignItems: "center",
+                    width: "100%",
                   }}
                 >
-                  <Button sx={{ color: theme.palette.warning.main }}>
-                    {item.editIcon}
-                  </Button>
-                  <Button sx={{ color: theme.palette.error.main }}>
-                    {item.deleteIcon}
-                  </Button>
+                  <Stack
+                    direction={{ md: "row", xs: "column" }}
+                    gap={1}
+                    sx={{ marginLeft: { md: "14.5%", xs: "" } }}
+                  >
+                    <Typography variant="body2" color="textSecondary">
+                      <strong>Author: </strong>
+                      {authors[item.userId] || "Loading..."}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      <strong>Date: </strong> {item.date}
+                    </Typography>
+                  </Stack>
+
+                  {currentUser && currentUser.uid === item.userId ? (
+                    <>
+                      <Box>
+                        <Button
+                          sx={{ color: theme.palette.info.main }}
+                          onClick={() => handleEditClick(item)}
+                        >
+                          {item.editIcon}
+                        </Button>
+                        <Button
+                          onClick={() => handleDeleteBlog(item.id)}
+                          sx={{ color: theme.palette.error.main }}
+                        >
+                          {item.deleteIcon}
+                        </Button>
+                      </Box>
+                    </>
+                  ) : null}
                 </Box>
               </Box>
             </Grid>
           ))}
         </Grid>
       </Box>
-
+      <Snackbar open={open} onClose={handleClose}>
+        <Alert
+          onClose={handleClose}
+          severity={snackBarMessage.includes("Error") ? "error" : "success"}
+        >
+          {snackBarMessage}
+        </Alert>
+      </Snackbar>
       <AddDialog />
+      {editBlog && (
+        <AddDialog isEdit={true} blogToEdit={editBlog} onEdit={handleEdit} />
+      )}
     </>
   );
 }

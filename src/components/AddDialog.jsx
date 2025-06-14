@@ -2,30 +2,41 @@ import { useState } from "react";
 import {
   Dialog,
   Fab,
-  FormControl,
   InputLabel,
-  OutlinedInput,
   FormHelperText,
   Button,
   TextField,
   Box,
   useTheme,
   useMediaQuery,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import { addBlog, imageToBase64, compressImage } from "../config/firestore";
 
-function AddDialog({ children }) {
+function AddDialog({ isEdit, blogToEdit, onEdit }) {
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
-  const [image, setImage] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [title, setTitle] = useState(blogToEdit?.title || "");
+  const [desc, setDesc] = useState(blogToEdit?.description || "");
+  const [image, setImage] = useState(blogToEdit?.image || null);
   const [titleError, setTitleError] = useState(false);
   const [descError, setDescError] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [alertSeverity, setAlertSeverity] = useState("success");
   const theme = useTheme();
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    // Clear form data when closing
+    if (isEdit) {
+      // If in edit mode, reset the blog to edit
+      onEdit(null, null);
+    }
+  };
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
@@ -42,34 +53,75 @@ function AddDialog({ children }) {
     setImageError(!e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const isTitleError = title.trim() === "";
     const isDescError = desc.trim() === "";
     const isImageError = !image;
+
     setTitleError(isTitleError);
     setDescError(isDescError);
     setImageError(isImageError);
-    if (!isTitleError && !isDescError && !isImageError) {
-      // Submit logic here
-      handleClose();
-      setTitle("");
-      setDesc("");
-      setImage(null);
+
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("user"));
+
+      if (!currentUser) {
+        setSnackbarMessage("You have to be logged in");
+        setAlertSeverity("warning");
+        setSnackbarOpen(true);
+        return;
+      }
+
+      if (!isTitleError && !isDescError && !isImageError) {
+        const blogData = {
+          title: title.trim(),
+          description: desc.trim(),
+          image:
+            typeof image === "string"
+              ? image
+              : await imageToBase64(await compressImage(image)),
+          createdAt: isEdit ? blogToEdit.createdAt : new Date().toISOString(),
+          userId: currentUser.uid,
+        };
+
+        if (isEdit) {
+          await onEdit(blogToEdit.id, blogData);
+          setSnackbarMessage("Blog updated successfully");
+        } else {
+          await addBlog(blogData);
+          setSnackbarMessage("Blog created successfully");
+        }
+
+        setAlertSeverity("success");
+        handleClose();
+        setTitle("");
+        setDesc("");
+        setImage(null);
+        setSnackbarOpen(true);
+      }
+    } catch (error) {
+      console.error(error);
+      setSnackbarMessage(
+        `Failed to ${isEdit ? "update" : "create"} blog: ${error.message}`
+      );
+      setAlertSeverity("error");
+      setSnackbarOpen(true);
     }
   };
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
   return (
     <>
-      <Fab
-        sx={{ position: "fixed", right: 16, bottom: 16, zIndex: 1000 }}
-        color="primary"
-        onClick={handleOpen}
-      >
-        {children || <AddIcon />}
-      </Fab>
+      {!isEdit && (
+        <Fab
+          sx={{ position: "fixed", right: 16, bottom: 16, zIndex: 1000 }}
+          onClick={handleOpen}
+        >
+          {<AddIcon />}
+        </Fab>
+      )}
       <Dialog
-        open={open}
+        open={isEdit || open}
         onClose={handleClose}
         fullScreen={fullScreen}
         maxWidth="md"
@@ -89,40 +141,33 @@ function AddDialog({ children }) {
           <Box
             component="h2"
             sx={{
-              borderBottom: `2px solid ${theme.palette.border.bottom}`,
+              borderBottom: `1px solid ${theme.palette.border.main}`,
               p: 1,
             }}
           >
-            Create you story...
+            {isEdit ? "Edit your story..." : "Create your story..."}
           </Box>
-          <FormControl required error={titleError}>
-            <InputLabel htmlFor="add-blog-title">Title</InputLabel>
-            <OutlinedInput
-              id="add-blog-title"
-              color="#888"
-              placeholder="Tell your story..."
-              value={title}
-              onChange={handleTitleChange}
-              label="Title"
-              onBlur={() => setTitleError(title.trim() === "")}
-            />
-            {titleError && (
-              <FormHelperText>This field is required.</FormHelperText>
-            )}
-          </FormControl>
-
+          <TextField
+            id="add=blog-title"
+            label="Title"
+            placeholder="Title"
+            color="#888"
+            value={title}
+            onChange={handleTitleChange}
+            onBlur={() => setTitleError(title.trim() === "")}
+            error={titleError}
+            helperText={titleError ? "This field is required." : ""}
+          />
           <TextField
             id="add-blog-desc"
-            color="#888"
             label="Description"
             placeholder="Tell your story..."
             sx={{
-              overflow: "auto",
-              resize: { xs: "vertical", sm: "both" },
               width: "100%",
               minWidth: 0,
               maxWidth: "100%",
             }}
+            color="#888"
             value={desc}
             onChange={handleDescChange}
             onBlur={() => setDescError(desc.trim() === "")}
@@ -131,7 +176,6 @@ function AddDialog({ children }) {
             multiline
             minRows={2}
             maxRows={6}
-            required
           />
 
           <Box sx={{ width: "100%" }}>
@@ -179,10 +223,15 @@ function AddDialog({ children }) {
             color="primary"
             sx={{ alignSelf: "flex-end", mt: 2 }}
           >
-            Submit
+            {isEdit ? "Update" : "Submit"}
           </Button>
         </Box>
       </Dialog>
+      <Snackbar open={snackbarOpen} onClose={() => setSnackbarOpen(false)}>
+        <Alert onClose={() => setSnackbarOpen(false)} severity={alertSeverity}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

@@ -5,7 +5,6 @@ import {
   Box,
   TextField,
   Typography,
-  useMediaQuery,
   Stack,
   Snackbar,
   Alert,
@@ -13,16 +12,13 @@ import {
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth, firestoreDb } from "../config/firebase";
 import { doc, setDoc } from "firebase/firestore";
-import { useTheme } from "@mui/material/styles";
 import ArrowRightAltIcon from "@mui/icons-material/ArrowRightAlt";
 import heroImg from "@/assets/images/hero.png";
 
-export default function SignupDialog({ children, onSignup }) {
+export default function SignupDialog({ onSignup }) {
   const [open, setOpen] = useState(false);
-  const [openAlert, setOpenAlert] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [alertSeverity, setAlertSeverity] = useState("success");
-  const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -31,7 +27,6 @@ export default function SignupDialog({ children, onSignup }) {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const handleAlertClose = () => setOpenAlert(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,7 +50,6 @@ export default function SignupDialog({ children, onSignup }) {
       });
       await auth.currentUser.reload();
 
-      // Save user info in localStorage
       localStorage.setItem(
         "user",
         JSON.stringify({
@@ -65,22 +59,20 @@ export default function SignupDialog({ children, onSignup }) {
         })
       );
 
-      // Notify parent (navbar) if needed
-      if (onSignup) {
-        onSignup({
-          email: userCredential.user.email,
-          displayName: name,
-          uid: userCredential.user.uid,
-        });
-      }
+      setTimeout(() => {
+        if (onSignup) {
+          onSignup({
+            email: userCredential.user.email,
+            displayName: name,
+            uid: userCredential.user.uid,
+          });
+        }
+      }, 3000);
 
       setSnackbarMessage("User created successfully");
-      setOpenAlert(true);
       setAlertSeverity("success");
+      setSnackbarOpen(true);
       handleClose();
-
-      // Redirect to home
-      window.location.href = "/";
     } catch (error) {
       let message = "Signup failed. Please try again.";
       if (error.code) {
@@ -103,7 +95,7 @@ export default function SignupDialog({ children, onSignup }) {
       }
       setSnackbarMessage(message);
       setAlertSeverity("error");
-      setOpenAlert(true);
+      setSnackbarOpen(true);
     } finally {
       setLoading(false);
     }
@@ -112,15 +104,9 @@ export default function SignupDialog({ children, onSignup }) {
   return (
     <>
       <Button variant="contained" sx={{ mx: 1 }} onClick={handleOpen}>
-        {children || "Sign up"}
+        {"Sign up"}
       </Button>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        fullScreen={fullScreen}
-        maxWidth="lg"
-        fullWidth
-      >
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="lg">
         <Box sx={{ p: { xs: 1, sm: 4 } }}>
           <Typography variant="h4" align="center" gutterBottom>
             Sign up
@@ -141,7 +127,7 @@ export default function SignupDialog({ children, onSignup }) {
                   width: { xs: "100%", sm: "50%" },
                   height: { xs: 200, sm: 400 },
                   objectFit: "cover",
-                  borderRadius: { xs: 2, sm: "16px 0 0 16px" },
+                  borderRadius: 2,
                   display: "block",
                 }}
               />
@@ -196,34 +182,14 @@ export default function SignupDialog({ children, onSignup }) {
                 </Button>
               </Box>
             </Stack>
-            <Snackbar
-              open={openAlert}
-              autoHideDuration={6000}
-              onClose={handleAlertClose}
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
-              sx={{
-                "& .MuiSnackbarContent-root": {
-                  minWidth: 350,
-                  fontSize: "1.2rem",
-                  p: 2,
-                },
-              }}
-            >
-              <Alert
-                onClose={handleAlertClose}
-                severity={alertSeverity}
-                sx={{
-                  width: "100%",
-                  fontSize: "1.1rem",
-                  p: 2,
-                }}
-              >
-                {snackbarMessage}
-              </Alert>
-            </Snackbar>
           </form>
         </Box>
       </Dialog>
+      <Snackbar open={snackbarOpen} onClose={() => setSnackbarOpen(false)}>
+        <Alert onClose={() => setSnackbarOpen(false)} severity={alertSeverity}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

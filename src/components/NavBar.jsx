@@ -9,7 +9,7 @@ import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
 import { useTheme, Box, Stack, IconButton, Button } from "@mui/material";
 import { Link } from "react-router";
 import LoginPopover from "./LoginPopover";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import SignupDialog from "./SignupDialog";
 
 function NavBar({ setMode }) {

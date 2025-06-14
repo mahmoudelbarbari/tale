@@ -1,5 +1,3 @@
-import { ColorLensRounded } from "@mui/icons-material";
-
 export const getDesignTokens = (mode) => ({
   palette: {
     mode,
@@ -34,21 +32,37 @@ export const getDesignTokens = (mode) => ({
       main: "#d32f2f",
       light: "#ef5350",
       dark: "#c62828",
+      "&:hover": {
+        backgroundColor: mode === "light" ? "#ef5350" : "#c62828",
+        opacity: 0.8,
+      },
     },
     warning: {
       main: "#ed6c02",
       light: "#ff9800",
       dark: "#e65100",
+      "&:hover": {
+        backgroundColor: mode === "light" ? "#ff9800" : "#e65100",
+        opacity: 0.8,
+      },
     },
     info: {
       main: "#0288d1",
       light: "#03a9f4",
       dark: "#01579b",
+      "&:hover": {
+        backgroundColor: mode === "light" ? "#03a9f4" : "#01579b",
+        opacity: 0.8,
+      },
     },
     success: {
       main: "#2e7d32",
       light: "#4caf50",
       dark: "#1b5e20",
+      "&:hover": {
+        backgroundColor: mode === "light" ? "#4caf50" : "#1b5e20",
+        opacity: 0.8,
+      },
     },
   },
   components: {
@@ -69,7 +83,7 @@ export const getDesignTokens = (mode) => ({
           backgroundColor: mode === "light" ? "#15171a" : "#f3f3f3",
           color: mode === "light" ? "#ffffff" : "#333333",
           "&:hover": {
-            backgroundColor: mode === "light" ? "#666666" : "#ffffff",
+            backgroundColor: mode === "light" ? "#666666" : "#888",
           },
         },
         text: {
@@ -104,60 +118,13 @@ export const getDesignTokens = (mode) => ({
         },
       },
     },
-    MuiCheckbox: {
-      styleOverrides: {
-        root: {
-          color: mode === "light" ? "#333333" : "#f3f3f3",
-        },
-      },
-    },
-    MuiRadio: {
-      styleOverrides: {
-        root: {
-          color: mode === "light" ? "#333333" : "#f3f3f3",
-        },
-      },
-    },
-    MuiSwitch: {
-      styleOverrides: {
-        root: {
-          "& .MuiSwitch-track": {
-            backgroundColor: mode === "light" ? "#cccccc" : "#666666",
-          },
-          "& .MuiSwitch-thumb": {
-            backgroundColor: mode === "light" ? "#333333" : "#f3f3f3",
-          },
-        },
-      },
-    },
-    MuiSelect: {
-      styleOverrides: {
-        root: {
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: mode === "light" ? "#333333" : "#f3f3f3",
-          },
-          "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: mode === "light" ? "#666666" : "#ffffff",
-          },
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: mode === "light" ? "#666666" : "#ffffff",
-          },
-          color: mode === "light" ? "#333333" : "#f3f3f3",
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          backgroundColor: mode === "light" ? "#ffffff" : "#1e1e1e",
-          borderColor: mode === "light" ? "#f3f3f3" : "#333333",
-        },
-      },
-    },
     MuiDialog: {
       styleOverrides: {
         paper: {
           backgroundColor: mode === "light" ? "#ffffff" : "#080414",
+          m: { xs: 2, sm: 0 },
+          // width: { xs: "90%", sm: "100%" },
+          borderRadius: { xs: 2, sm: 0 },
         },
       },
     },
@@ -174,9 +141,45 @@ export const getDesignTokens = (mode) => ({
           backgroundColor: mode === "light" ? "#15171a" : "#f3f3f3",
           color: mode === "light" ? "#ffffff" : "#333333",
           "&:hover": {
-            backgroundColor: mode === "light" ? "#666666" : "#ffffff",
-            color: mode === "light" ? "#ffffff" : "#333333",
+            backgroundColor: mode === "light" ? "#666666" : "#888",
+            color: mode === "light" ? "#ffffff" : "#000000",
           },
+        },
+      },
+    },
+    MuiSnackbar: {
+      styleOverrides: {
+        root: {
+          "& .MuiAlert-root": {
+            backgroundColor: mode === "light" ? "#ffffff" : "#1e1e1e",
+            color: mode === "light" ? "#333333" : "#ffffff",
+          },
+          "& .MuiAlert-standardSuccess": {
+            backgroundColor: mode === "light" ? "#edf7ed" : "#1e4620",
+            color: mode === "light" ? "#1e4620" : "#ffffff",
+          },
+          "& .MuiAlert-standardWarning": {
+            backgroundColor: mode === "light" ? "#fff4e5" : "#663c00",
+            color: mode === "light" ? "#663c00" : "#ffffff",
+          },
+          "& .MuiAlert-standardError": {
+            backgroundColor: mode === "light" ? "#fdeded" : "#5f2120",
+            color: mode === "light" ? "#5f2120" : "#ffffff",
+          },
+        },
+      },
+      defaultProps: {
+        anchorOrigin: { vertical: "top", horizontal: "right" },
+        autoHideDuration: 6000,
+      },
+    },
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          alignItems: "center",
+        },
+        icon: {
+          opacity: 0.9,
         },
       },
     },
