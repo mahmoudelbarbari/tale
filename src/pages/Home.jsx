@@ -34,6 +34,8 @@ function Home() {
   const [currentUser, setCurrentUser] = useState(null);
   const [editBlog, setEditBlog] = useState(null);
 
+  const loggedIn = JSON.parse(localStorage.getItem("user"));
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setCurrentUser(user);
@@ -238,7 +240,9 @@ function Home() {
                     </Typography>
                   </Stack>
 
-                  {currentUser && currentUser.uid === item.userId ? (
+                  {loggedIn != null &&
+                  currentUser &&
+                  currentUser.uid === item.userId ? (
                     <>
                       <Box>
                         <Button
