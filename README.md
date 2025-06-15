@@ -46,7 +46,7 @@ service cloud.firestore {
   }
 }
 ```
-##💡 Getting Started
+## 💡 Getting Started
 1. Clone the repository
 ```bash
 git clone https://github.com/your-username/your-repo-name.git
@@ -78,7 +78,7 @@ const firebaseConfig = {
 ```bash
 npm run dev
 ```
-##🌍 Deployment
+## 🌍 Deployment
 This app is deployed on Vercel. You can deploy your own copy easily:
 
 Push your project to GitHub.
@@ -89,7 +89,7 @@ Import your repo and configure the build settings (npm run build).
 
 Set Firebase environment variables if needed.
 
-##🙌 Contributing
+## 🙌 Contributing
 Contributions are welcome! Feel free to fork the project and open a pull request with your improvements.
 
 📃 License
