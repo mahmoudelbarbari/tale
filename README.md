@@ -57,13 +57,13 @@ cd your-repo-name
 npm install
 ```
 3. Setup Firebase
- *Create a Firebase project.
+ -Create a Firebase project.
 
- *Enable Email/Password Authentication.
+ -Enable Email/Password Authentication.
 
- *Create a Firestore database and Firebase Storage.
+ -Create a Firestore database and Firebase Storage.
 
- *Add your Firebase config to the firebase/firebaseConfig.js file.
+ -Add your Firebase config to the firebase/firebaseConfig.js file.
  ```bash
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
@@ -81,16 +81,16 @@ npm run dev
 ## 🌍 Deployment
 This app is deployed on Vercel. You can deploy your own copy easily:
 
-Push your project to GitHub.
+  - Push your project to GitHub.
 
-Go to vercel.com, sign in with GitHub.
+  - Go to vercel.com, sign in with GitHub.
 
-Import your repo and configure the build settings (npm run build).
+  - Import your repo and configure the build settings (npm run build).
 
-Set Firebase environment variables if needed.
+  - Set Firebase environment variables if needed.
 
 ## 🙌 Contributing
-Contributions are welcome! Feel free to fork the project and open a pull request with your improvements.
+  - Contributions are welcome! Feel free to fork the project and open a pull request with your improvements.
 
 📃 License
-This project is licensed under the MIT License.
+  - This project is licensed under the MIT License.
